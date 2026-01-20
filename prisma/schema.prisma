@@ -31,6 +31,10 @@ model User {
   created_at         DateTime  @default(now())
   updated_at         DateTime  @updatedAt
 
+
+  teaching_courses   Course[]
+  enrollments        Enrollment[]
+
   @@map("users")
 }
 
@@ -38,4 +42,120 @@ enum UserStatus {
   active
   inactive
   suspended
+}
+
+model Category {
+  id          String     @id @default(cuid())
+  name        String     @unique
+  slug        String     @unique
+  description String?
+  icon        String?
+  color       String?
+  parent_id   String?
+  parent      Category?  @relation("SubCategories", fields: [parent_id], references: [id])
+  children    Category[] @relation("SubCategories")
+  courses     Course[]
+  order       Int        @default(0)
+  is_active   Boolean    @default(true)
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
+
+  @@map("categories")
+}
+
+model Course {
+  id                String       @id @default(cuid())
+  title             String
+  slug              String       @unique
+  description       String
+  short_description String?
+  thumbnail_url     String
+  instructor_id     String
+  instructor        User         @relation(fields: [instructor_id], references: [id])
+  category_id       String
+  category          Category     @relation(fields: [category_id], references: [id])
+  level             CourseLevel  @default(beginner)
+  duration_minutes  Int
+  status            CourseStatus @default(draft)
+  price             Decimal      @default(0.00)
+  access_days       Int          @default(90)
+  prerequisites     String?
+  learning_outcomes String? // JSON string
+  featured          Boolean      @default(false)
+  order             Int          @default(0)
+  created_at        DateTime     @default(now())
+  updated_at        DateTime     @updatedAt
+  published_at      DateTime?
+  modules           Module[]
+  lessons           Lesson[]
+  enrollments       Enrollment[]
+
+  @@map("courses")
+}
+
+model Module {
+  id          String   @id @default(cuid())
+  course_id   String
+  course      Course   @relation(fields: [course_id], references: [id])
+  title       String
+  description String?
+  order       Int
+  lessons     Lesson[]
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  @@map("modules")
+}
+
+model Lesson {
+  id                     String   @id @default(cuid())
+  course_id              String
+  course                 Course   @relation(fields: [course_id], references: [id])
+  module_id              String?
+  module                 Module?  @relation(fields: [module_id], references: [id])
+  title                  String
+  slug                   String
+  description            String?
+  video_url              String
+  video_duration_seconds Int
+  content                String?
+  attachments            String? // JSON string
+  order                  Int
+  is_preview             Boolean  @default(false)
+  is_required            Boolean  @default(true)
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
+
+  @@map("lessons")
+}
+
+model Enrollment {
+  id                  String    @id @default(cuid())
+  user_id             String
+  user                User      @relation(fields: [user_id], references: [id])
+  course_id           String
+  course              Course    @relation(fields: [course_id], references: [id])
+  status              String    @default("active") // active, completed, cancelled, expired
+  progress_percentage Decimal   @default(0)
+  enrolled_at         DateTime
+  completed_at        DateTime?
+  expires_at          DateTime
+  last_accessed_at    DateTime?
+  created_at          DateTime  @default(now())
+  updated_at          DateTime  @updatedAt
+
+  @@unique([user_id, course_id])
+  @@map("enrollments")
+}
+
+enum CourseLevel {
+  beginner
+  intermediate
+  advanced
+}
+
+enum CourseStatus {
+  draft
+  published
+  archived
 }
