@@ -23,6 +23,16 @@ class CoursesController {
             return res.status(500).json({ error: "Erro ao buscar curso." });
         }
     }
+
+    async myCourses(req: Request, res: Response) {
+        try {
+            const userId = (req as any).user?.userId;
+            const courses = await coursesService.listEnrollments(userId);
+            return res.json(courses);
+        } catch (error: any) {
+            return res.status(500).json({ error: "Erro ao buscar cursos matriculados." });
+        }
+    }
 }
 
 export default new CoursesController();

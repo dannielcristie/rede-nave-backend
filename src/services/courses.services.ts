@@ -62,6 +62,35 @@ export class CoursesService {
         if (!course) throw new Error("Curso não encontrado.");
         return course;
     }
+
+    async listEnrollments(userId: string) {
+        const enrollments = await prisma.enrollment.findMany({
+            where: { user_id: userId },
+            include: {
+                course: {
+                    include: {
+                        instructor: {
+                            select: { name: true }
+                        },
+                        lessons: {
+                            select: { id: true } // Just to count
+                        }
+                    }
+                }
+            }
+        });
+
+        return enrollments.map(e => ({
+            ...e.course,
+            enrollment: {
+                progress: e.progress_percentage,
+                status: e.status,
+                last_accessed: e.last_accessed_at,
+                completed_lessons: 0, // We'd need to count lesson_progress
+                total_lessons: e.course.lessons.length
+            }
+        }));
+    }
 }
 
 export const coursesService = new CoursesService();
