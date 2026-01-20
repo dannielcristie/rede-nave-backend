@@ -14,14 +14,28 @@ enum Role {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  name          String
-  email         String   @unique
-  password_hash String
-  role          Role     @default(student)
-  active        Boolean  @default(true)
-  created_at    DateTime @default(now())
-  updated_at    DateTime @updatedAt
+  id                 String    @id @default(cuid())
+  name               String
+  email              String    @unique
+  cpf                String?   @unique
+  password_hash      String
+  phone              String?
+  address            String?
+  bio                String?
+  avatar_url         String?
+  role               Role      @default(student)
+  status             UserStatus @default(active)
+  email_verified     Boolean   @default(false)
+  two_factor_enabled Boolean   @default(false)
+  last_login_at      DateTime?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
 
   @@map("users")
+}
+
+enum UserStatus {
+  active
+  inactive
+  suspended
 }
