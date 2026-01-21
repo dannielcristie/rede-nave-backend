@@ -66,6 +66,17 @@ npm run build
 npm start
 ```
 
+### 5. Rodando com Docker (Recomendado)
+
+Subir todo o ambiente (Banco + API) de uma vez:
+
+```bash
+docker compose up -d
+```
+- A API estará disponível em `http://localhost:3000`.
+- O Banco PostgreSQL estará na porta `5432`.
+
+
 ## 📚 Documentação da API
 
 ### Autenticação (`/api/auth`)
